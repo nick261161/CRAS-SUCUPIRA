@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CRAS - Prefeitura Municipal de Sucupira do Riachão (MA)</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #0284c7;
+            --primary-light: #0ea5e9;
+            --accent: #f59e0b;
+            --bg-color: #f0f6ff;
+            --card-bg: #ffffff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --border-color: #cbd5e1;
+            --shadow: 0 10px 25px -5px rgba(2, 132, 199, 0.08), 0 8px 10px -6px rgba(2, 132, 199, 0.05);
+        }
+
+        body.dark-mode {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --border-color: #334155;
+            --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+        }
+
+        * { box-sizing: border-box; transition: background-color 0.3s, color 0.3s, transform 0.2s, box-shadow 0.3s; }
+        body { font-family: 'Inter', sans-serif; background-color: var(--bg-color); color: var(--text-main); margin: 0; padding: 0; }
+
+        /* Header com fundo Branco para destacar a logo e o texto */
+        header {
+            background-color: #ffffff;
+            border-bottom: 2px solid var(--border-color);
+            padding: 12px 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+        }
+        body.dark-mode header {
+            background-color: var(--card-bg);
+        }
+
+        .logo-area-pequena { display: flex; align-items: center; gap: 12px; cursor: pointer; }
+        .logo-area-pequena img { height: 42px; width: auto; object-fit: contain; }
+        
+        /* Ajuste de cores solicitado: Nome principal em preto, subtítulo em azul */
+        .logo-text h1 { margin: 0; font-size: 18px; font-weight: 700; color: #000000; }
+        body.dark-mode .logo-text h1 { color: #ffffff; }
+        .logo-text span { font-size: 12px; color: var(--primary); font-weight: 600; display: block; }
+
+        /* Menu Hamburger */
+        .menu-container { position: relative; }
+        .btn-hamburger {
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            width: 42px; height: 42px;
+            border-radius: 12px;
+            cursor: pointer;
+            display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 5px;
+        }
+        .btn-hamburger span { display: block; width: 18px; height: 2px; background-color: var(--text-main); border-radius: 2px; }
+
+        .dropdown-menu {
+            display: none; position: absolute; right: 0; top: 50px;
+            background-color: var(--card-bg); border: 1px solid var(--border-color);
+            min-width: 220px; box-shadow: var(--shadow); border-radius: 14px; overflow: hidden;
+            animation: fadeIn 0.2s ease-in-out;
+        }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .dropdown-menu a, .dropdown-menu button {
+            display: block; width: 100%; padding: 14px 18px; text-align: left;
+            background: none; border: none; color: var(--text-main); font-size: 14px; font-weight: 500;
+            text-decoration: none; cursor: pointer;
+        }
+        .dropdown-menu a:hover, .dropdown-menu button:hover { background-color: rgba(2, 132, 199, 0.08); color: var(--primary); }
+        .dropdown-divider { height: 1px; background-color: var(--border-color); margin: 0; }
+
+        /* Hero Banner */
+        .hero {
+            background: linear-gradient(135deg, #ccd6db, #0369a1), url('https://images.unsplash.com/photo-1532629345422-7515f3d16bb9?auto=format&fit=crop&w=1400&q=80');
+            background-size: cover; background-position: center; background-blend-mode: overlay;
+            color: white; text-align: center; padding: 60px 20px;
+            border-bottom-left-radius: 35px; border-bottom-right-radius: 35px;
+            box-shadow: 0 15px 30px rgba(2, 132, 199, 0.2);
+            margin-bottom: 40px;
+        }
+        .logo-grande { max-height: 90px; width: auto; object-fit: contain; margin-bottom: 15px; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.15)); }
+        .hero h2 { font-size: 28px; font-weight: 700; margin: 0 0 10px 0; }
+        .hero p { font-size: 15px; max-width: 600px; margin: 0 auto; opacity: 0.95; font-weight: 300; }
+
+        /* Container Principal */
+        .container { max-width: 1100px; margin: 0 auto; padding: 0 20px 50px 20px; }
+
+        .barra-pesquisa { position: relative; margin-bottom: 35px; }
+        .barra-pesquisa input {
+            width: 100%; padding: 16px 20px 16px 50px;
+            background-color: var(--card-bg); border: 2px solid var(--border-color);
+            border-radius: 16px; font-size: 15px; color: var(--text-main);
+            box-shadow: var(--shadow); outline: none;
+        }
+        .barra-pesquisa input:focus { border-color: var(--primary); box-shadow: 0 0 0 4px rgba(2, 132, 199, 0.15); }
+        .barra-pesquisa svg {
+            position: absolute; left: 18px; top: 50%; transform: translateY(-50%);
+            width: 20px; height: 20px; fill: var(--text-muted);
+        }
+
+        .grid-layout { display: grid; grid-template-columns: 2fr 1fr; gap: 30px; }
+        @media(max-width: 768px) { .grid-layout { grid-template-columns: 1fr; } }
+
+        .noticia-card {
+            background-color: var(--card-bg); border: 1px solid var(--border-color);
+            padding: 24px; margin-bottom: 20px; border-radius: 16px;
+            box-shadow: var(--shadow); position: relative; overflow: hidden;
+        }
+        .noticia-card:hover { transform: translateY(-4px); box-shadow: 0 20px 30px -10px rgba(2, 132, 199, 0.15); border-color: var(--primary-light); }
+        .noticia-card h3 { color: var(--primary); margin: 8px 0 12px 0; font-size: 20px; cursor: pointer; }
+        body.dark-mode .noticia-card h3 { color: #38bdf8; }
+        .data-pub { font-size: 12px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; }
+        .noticia-card p { color: var(--text-muted); font-size: 14px; line-height: 1.6; margin-bottom: 20px; }
+        
+        .btn-ler {
+            background-color: var(--primary); color: white; border: none;
+            padding: 10px 18px; border-radius: 10px; cursor: pointer; font-size: 13px; font-weight: 600;
+            display: inline-flex; align-items: center; gap: 6px;
+        }
+        .btn-ler:hover { background-color: #0369a1; }
+
+        .sidebar-card {
+            background-color: var(--card-bg); border: 1px solid var(--border-color);
+            padding: 24px; border-radius: 16px; box-shadow: var(--shadow); margin-bottom: 25px;
+        }
+        .sidebar-card h4 { color: var(--primary); margin-top: 0; font-size: 16px; font-weight: 700; border-bottom: 2px solid var(--border-color); padding-bottom: 12px; }
+        body.dark-mode .sidebar-card h4 { color: #38bdf8; }
+        .sidebar-card ul { padding: 0; margin: 0; list-style: none; }
+        .sidebar-card li { margin-bottom: 12px; font-size: 14px; }
+        .sidebar-card li a { color: var(--text-main); text-decoration: none; font-weight: 500; cursor: pointer; display: block; padding: 6px 0; }
+        .sidebar-card li a:hover { color: var(--primary); padding-left: 5px; }
+
+        .detalhe-noticia, .pagina-conteudo {
+            background-color: var(--card-bg); border: 1px solid var(--border-color);
+            padding: 40px; border-radius: 20px; box-shadow: var(--shadow);
+        }
+        .detalhe-noticia img { width: 100%; max-height: 450px; object-fit: cover; border-radius: 14px; margin: 20px 0; }
+        .fonte-img { font-size: 12px; color: var(--text-muted); font-style: italic; margin-bottom: 25px; display: block; }
+        
+        .btn-voltar {
+            background-color: var(--border-color); color: var(--text-main); border: none;
+            padding: 10px 16px; border-radius: 10px; cursor: pointer; font-size: 13px; font-weight: 600;
+            margin-bottom: 25px; display: inline-flex; align-items: center; gap: 6px;
+        }
+        .btn-voltar:hover { opacity: 0.8; }
+
+        footer { background-color: var(--card-bg); border-top: 1px solid var(--border-color); text-align: center; padding: 30px; font-size: 13px; color: var(--text-muted); margin-top: 60px; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <!-- Logo Pequena no Canto Superior Esquerdo -->
+        <div class="logo-area-pequena" onclick="carregarHome()">
+            <img src="logomenor CRAS.png" alt="Logo Pequena" onerror="this.src='https://via.placeholder.com/40x40?text=MA'">
+            <div class="logo-text">
+                <h1>CRAS Sucupira</h1>
+                <span>Assistência Social</span>
+            </div>
+        </div>
+        
+        <div class="menu-container">
+            <button class="btn-hamburger" onclick="toggleMenu()" title="Menu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+            <div id="dropdownMenu" class="dropdown-menu">
+                <button onclick="alternarTema()">🌓 Alternar Tema</button>
+                <div class="dropdown-divider"></div>
+                <a href="login.html">🔑 Login do Sistema</a>
+            </div>
+        </div>
+    </header>
+
+    <div class="hero">
+        <!-- Logo Maior Centralizada no Banner -->
+        <img src="logosucupira.png" alt="Logo Oficial Central" class="logo-grande" onerror="this.style.display='none'">
+        <h2>Assistência com Dignidade e Cuidado</h2>
+        <p>Centro de Referência da Assistência Social - Garantindo direitos e proteção social para as famílias de Sucupira do Riachão.</p>
+    </div>
+
+    <div class="container" id="conteudoPrincipal">
+        <!-- Dinâmico via JS -->
+    </div>
+
+    <footer>
+        <p>Prefeitura Municipal de Sucupira do Riachão - MA &copy; 2026 | Gestão da Assistência Social</p>
+    </footer>
+
+    <script>
+        const supabaseUrl = 'https://zctwniydwivhrwcstwti.supabase.co';
+        const supabaseKey = 'sb_publishable_WUPOG8uoWrt2h0aszpWywQ_cUuGLlvH';
+        const clienteSupabase = supabase.createClient(supabaseUrl, supabaseKey);
+
+        let todasNoticias = [];
+
+        function toggleMenu() {
+            const menu = document.getElementById('dropdownMenu');
+            menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+        }
+
+        window.onclick = function(event) {
+            if (!event.target.closest('.menu-container')) {
+                document.getElementById('dropdownMenu').style.display = 'none';
+            }
+        }
+
+        function alternarTema() {
+            document.body.classList.toggle('dark-mode');
+            const isDark = document.body.classList.contains('dark-mode');
+            localStorage.setItem('tema_escuro', isDark);
+        }
+
+        if (localStorage.getItem('tema_escuro') === 'true') {
+            document.body.classList.add('dark-mode');
+        }
+
+        async function carregarHome() {
+            const container = document.getElementById('conteudoPrincipal');
+            container.innerHTML = `
+                <div class="barra-pesquisa">
+                    <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+                    <input type="text" id="inputBusca" placeholder="Pesquisar por notícias, avisos ou programas sociais..." onkeyup="filtrarNoticias()">
+                </div>
+                <div class="grid-layout">
+                    <div>
+                        <h2 style="font-size: 22px; margin-bottom: 20px;">Últimas Notícias e Informativos</h2>
+                        <div id="listaNoticiasPublicas">Carregando postagens...</div>
+                    </div>
+                    <div>
+                        <div class="sidebar-card">
+                            <h4>Serviços Oferecidos</h4>
+                            <ul>
+                                <li><a onclick="abrirPaginaServico('paif')">🔹 Atendimento Particularizado (PAIF)</a></li>
+                                <li><a onclick="abrirPaginaServico('cadunico')">🔹 CadÚnico e Bolsa Família</a></li>
+                                <li><a onclick="abrirPaginaServico('bpc')">🔹 Benefício de Prestação Continuada (BPC)</a></li>
+                                <li><a onclick="abrirPaginaServico('direitos')">🔹 Orientações sobre Direitos Sociais</a></li>
+                            </ul>
+                        </div>
+                        <div class="sidebar-card">
+                            <h4>Informações Úteis</h4>
+                            <p style="font-size: 14px; color: var(--text-muted); line-height: 1.5;"><strong>Horário:</strong><br>Segunda a Sexta, das 08h às 14h.</p>
+                            <p style="font-size: 14px; color: var(--text-muted); line-height: 1.5; margin-bottom: 0;"><strong>Localização:</strong><br>Centro, Sucupira do Riachão - MA</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            const { data, error } = await clienteSupabase
+                .from('noticias_blog')
+                .select('*')
+                .order('data_publicacao', { ascending: false });
+
+            if (error || !data) {
+                document.getElementById('listaNoticiasPublicas').innerHTML = "<p>Nenhuma postagem encontrada.</p>";
+                return;
+            }
+
+            todasNoticias = data;
+            exibirListaNoticias(todasNoticias);
+        }
+
+        function exibirListaNoticias(noticias) {
+            const divLista = document.getElementById('listaNoticiasPublicas');
+            if (!divLista) return;
+
+            if (noticias.length === 0) {
+                divLista.innerHTML = "<p style='color: var(--text-muted);'>Nenhum resultado encontrado para a sua busca.</p>";
+                return;
+            }
+
+            divLista.innerHTML = "";
+            noticias.forEach(n => {
+                const card = document.createElement('div');
+                card.className = 'noticia-card';
+                const resumo = n.conteudo.length > 150 ? n.conteudo.substring(0, 150) + '...' : n.conteudo;
+                
+                card.innerHTML = `
+                    <span class="data-pub">${new Date(n.data_publicacao).toLocaleDateString('pt-BR')}</span>
+                    <h3 onclick='lerNoticiaCompleta(${JSON.stringify(n)})'>${n.titulo}</h3>
+                    <p>${resumo}</p>
+                    <button class="btn-ler" onclick='lerNoticiaCompleta(${JSON.stringify(n)})'>Ler Notícia Completa &rarr;</button>
+                `;
+                divLista.appendChild(card);
+            });
+        }
+
+        function filtrarNoticias() {
+            const termo = document.getElementById('inputBusca').value.toLowerCase();
+            const filtradas = todasNoticias.filter(n => 
+                n.titulo.toLowerCase().includes(termo) || n.conteudo.toLowerCase().includes(termo)
+            );
+            exibirListaNoticias(filtradas);
+        }
+
+        function lerNoticiaCompleta(noticia) {
+            const container = document.getElementById('conteudoPrincipal');
+            const dataFormatada = new Date(noticia.data_publicacao).toLocaleDateString('pt-BR');
+
+            container.innerHTML = `
+                <button class="btn-voltar" onclick="carregarHome()">&larr; Voltar para o Início</button>
+                <div class="detalhe-noticia">
+                    <span class="data-pub">Publicado em: ${dataFormatada}</span>
+                    <h1 style="color: var(--primary); font-size: 28px; margin-top: 10px;">${noticia.titulo}</h1>
+                    ${noticia.url_imagem ? `<img src="${noticia.url_imagem}" alt="Imagem">` : ''}
+                    ${noticia.fonte_imagem ? `<span class="fonte-img">Crédito / Fonte: ${noticia.fonte_imagem}</span>` : ''}
+                    <div style="line-height: 1.8; font-size: 16px; white-space: pre-line; margin-top: 25px; color: var(--text-main);">
+                        ${noticia.conteudo}
+                    </div>
+                </div>
+            `;
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function abrirPaginaServico(tipo) {
+            const container = document.getElementById('conteudoPrincipal');
+            let titulo = "";
+            let texto = "";
+
+            if (tipo === 'paif') {
+                titulo = "Serviço de Proteção e Atendimento Integral à Família (PAIF)";
+                texto = "O PAIF consiste no trabalho social com famílias, realizado de forma continuada, visando fortalecer a convivência familiar e comunitária, prevenir a ruptura de vínculos e promover o acesso a direitos e serviços públicos.";
+            } else if (tipo === 'cadunico') {
+                titulo = "CadÚnico e Bolsa Família";
+                texto = "O Cadastro Único é o instrumento que coleta dados para identificar as famílias de baixa renda no Brasil. Através dele, o cidadão pode ter acesso a programas sociais como o Bolsa Família e a Tarifa Social de Energia Elétrica.";
+            } else if (tipo === 'bpc') {
+                titulo = "Benefício de Prestação Continuada (BPC)";
+                texto = "O BPC assegura a transferência de um salário mínimo ao idoso com 65 anos ou mais e à pessoa com deficiência de qualquer idade que comprovem não possuir meios de prover a própria manutenção.";
+            } else if (tipo === 'direitos') {
+                titulo = "Orientações sobre Direitos Sociais";
+                texto = "O CRAS oferece orientações detalhadas sobre os direitos sociais garantidos pela Constituição Federal e pelas leis de assistência social, prestando suporte completo para o encaminhamento e emissão de documentos.";
+            }
+
+            container.innerHTML = `
+                <button class="btn-voltar" onclick="carregarHome()">&larr; Voltar para o Início</button>
+                <div class="pagina-conteudo">
+                    <h1 style="color: var(--primary); font-size: 28px; margin-top: 0;">${titulo}</h1>
+                    <p style="line-height: 1.8; font-size: 16px; margin-top: 25px; color: var(--text-main);">${texto}</p>
+                </div>
+            `;
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        carregarHome();
+    </script>
+</body>
+</html>

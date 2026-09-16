@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - CRAS Sucupira do Riachão</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f0f2f5; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .login-card { background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); width: 100%; max-width: 400px; }
+        h2 { text-align: center; color: #1b5e20; margin-bottom: 20px; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; color: #333; }
+        input { width: 100%; padding: 10px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; }
+        button { width: 100%; background-color: #2e7d32; color: white; padding: 12px; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; font-weight: bold; }
+        button:hover { background-color: #1b5e20; }
+        .error-msg { color: #d32f2f; font-size: 14px; text-align: center; margin-top: 10px; }
+    </style>
+</head>
+<body>
+
+    <div class="login-card">
+        <h2>CRAS - Acesso Restrito</h2>
+        
+        <div class="form-group">
+            <label for="email">E-mail institucional:</label>
+            <input type="email" id="email" placeholder="seu.email@cras.ma.gov.br">
+        </div>
+
+        <div class="form-group">
+            <label for="senha">Senha:</label>
+            <input type="password" id="senha" placeholder="********">
+        </div>
+
+        <button onclick="fazerLogin()">Entrar no Sistema</button>
+        <p id="mensagemErro" class="error-msg"></p>
+    </div>
+
+    <script>
+        const supabaseUrl = 'https://zctwniydwivhrwcstwti.supabase.co';
+        const supabaseKey = 'sb_publishable_WUPOG8uoWrt2h0aszpWywQ_cUuGLlvH'; // Cole sua chave publicável completa aqui
+        
+        const clienteSupabase = supabase.createClient(supabaseUrl, supabaseKey);
+
+        async function fazerLogin() {
+            const email = document.getElementById('email').value;
+            const senha = document.getElementById('senha').value;
+            const msgErro = document.getElementById('mensagemErro');
+            
+            msgErro.textContent = "Entrando...";
+
+            // 1. Tenta autenticar o usuário no Supabase Auth
+            const { data, error } = await clienteSupabase.auth.signInWithPassword({
+                email: email,
+                password: senha,
+            });
+
+            if (error) {
+                msgErro.textContent = "Erro: E-mail ou senha incorretos.";
+                return;
+            }
+
+            // 2. Se a senha estiver correta, busca o nível de acesso na nossa tabela 'usuarios_sistema'
+            const userId = data.user.id;
+            const { data: perfil, error: erroPerfil } = await clienteSupabase
+                .from('usuarios_sistema')
+                .select('nivel_acesso, nome_completo')
+                .eq('id_usuario', userId)
+                .single();
+
+            if (erroPerfil || !perfil) {
+                msgErro.textContent = "Erro ao carregar dados do perfil do usuário.";
+                return;
+            }
+
+            // 3. Redireciona com base no nível de acesso
+            alert(`Bem-vindo(a), ${perfil.nome_completo}! Acesso autorizado.`);
+            
+            if (perfil.nivel_acesso === 'coordenador') {
+                window.location.href = 'painel-coordenador.html';
+            } else {
+                window.location.href = 'painel-comum.html';
+            }
+        }
+    </script>
+
+</body>
+</html>

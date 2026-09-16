@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel do Atendente - CRAS Sucupira do Riachão</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f7f9fc; margin: 0; padding: 0; color: #333; }
+        header { background-color: #2e7d32; color: white; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; }
+        header h2 { margin: 0; font-size: 20px; }
+        .btn-sair { background-color: #d32f2f; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        .btn-sair:hover { background-color: #b71c1c; }
+        .container { max-width: 900px; margin: 30px auto; background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        .form-section { margin-bottom: 30px; padding-bottom: 20px; border-bottom: 1px solid #eee; }
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .form-group { margin-bottom: 15px; }
+        .form-group.full { grid-column: span 2; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 14px; }
+        input, select, textarea { width: 100%; padding: 10px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; }
+        textarea { resize: vertical; height: 80px; }
+        button.btn-salvar { background-color: #2e7d32; color: white; padding: 12px 20px; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; font-weight: bold; }
+        button.btn-salvar:hover { background-color: #1b5e20; }
+        
+        /* Lista de Famílias */
+        .lista-familias { list-style: none; padding: 0; }
+        .lista-familias li { background: #f1f8e9; padding: 15px; margin-bottom: 10px; border-radius: 5px; border-left: 5px solid #2e7d32; display: flex; justify-content: space-between; align-items: center; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h2 id="saudacao">Carregando painel...</h2>
+        <button class="btn-sair" onclick="fazerLogout()">Sair do Sistema</button>
+    </header>
+
+    <div class="container">
+        
+        <!-- SEÇÃO 1: CADASTRO DE FAMÍLIA -->
+        <div class="form-section">
+            <h3>🏠 Cadastrar Nova Família</h3>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="nis">NIS do Responsável (11 dígitos):</label>
+                    <input type="text" id="nis" placeholder="Ex: 12345678901" maxlength="11">
+                </div>
+                <div class="form-group">
+                    <label for="telefone">Telefone de Contato:</label>
+                    <input type="text" id="telefone" placeholder="Ex: (99) 99999-9999">
+                </div>
+                <div class="form-group">
+                    <label for="bairro">Bairro ou Povoado:</label>
+                    <input type="text" id="bairro" placeholder="Ex: Centro / Povoado X">
+                </div>
+                <div class="form-group">
+                    <label for="renda">Renda Per Capita (R$):</label>
+                    <input type="text" id="renda" placeholder="Ex: 150.00">
+                </div>
+                <div class="form-group full">
+                    <label for="endereco">Endereço Completo:</label>
+                    <input type="text" id="endereco" placeholder="Ex: Rua Principal, nº 123">
+                </div>
+            </div>
+            <button class="btn-salvar" onclick="cadastrarFamilia()">Salvar Família</button>
+        </div>
+
+        <!-- SEÇÃO 2: CONSULTAR / LISTAR FAMÍLIAS -->
+        <div>
+            <h3>📋 Famílias Cadastradas no CRAS</h3>
+            <button onclick="carregarFamilias()" style="background-color: #1976d2; color: white; padding: 8px 15px; border: none; border-radius: 4px; cursor: pointer; margin-bottom: 15px;">Atualizar Lista</button>
+            <ul id="ulFamilias" class="lista-familias">
+                <li>Clique no botão "Atualizar Lista" para carregar os registros.</li>
+            </ul>
+        </div>
+
+    </div>
+
+    <script>
+        const supabaseUrl = 'https://zctwniydwivhrwcstwti.supabase.co';
+        const supabaseKey = 'sb_publishable_WUPOG8uoWrt2h0aszpWywQ_cUuGLlvH'; // Cole sua chave publicável completa aqui
+        
+        const clienteSupabase = supabase.createClient(supabaseUrl, supabaseKey);
+
+        let usuarioLogadoId = null;
+
+        // 1. Verifica ao carregar a página se o usuário está autenticado
+        async function verificarSessao() {
+            const { data: { session }, error } = await clienteSupabase.auth.getSession();
+            
+            if (error || !session) {
+                // Se não estiver logado, chuta de volta para o login
+                window.location.href = 'login.html';
+                return;
+            }
+
+            usuarioLogadoId = session.user.id;
+
+            // Busca o nome do atendente na tabela usuarios_sistema
+            const { data: perfil } = await clienteSupabase
+                .from('usuarios_sistema')
+                .select('nome_completo, cargo')
+                .eq('id_usuario', usuarioLogadoId)
+                .single();
+
+            if (perfil) {
+                document.getElementById('saudacao').textContent = `CRAS Sucupira do Riachão | Atendente: ${perfil.nome_completo} (${perfil.cargo})`;
+            }
+        }
+
+        verificarSessao();
+
+        // 2. Função de Cadastro de Família
+        async function cadastrarFamilia() {
+            const nis = document.getElementById('nis').value;
+            const telefone = document.getElementById('telefone').value;
+            const bairro = document.getElementById('bairro').value;
+            const renda = document.getElementById('renda').value;
+            const endereco = document.getElementById('endereco').value;
+
+            if (!endereco || !bairro) {
+                alert("Por favor, preencha pelo menos o endereço e o bairro/povoado.");
+                return;
+            }
+
+            const { error } = await clienteSupabase
+                .from('familias')
+                .insert([
+                    { 
+                        nis_responsavel: nis || null,
+                        telefone_contato: telefone || null,
+                        bairro_povoado: bairro,
+                        renda_per_capita: renda ? parseFloat(renda) : null,
+                        endereco_completo: endereco 
+                    }
+                ]);
+
+            if (error) {
+                alert("Erro ao cadastrar família: " + error.message);
+            } else {
+                alert("Família cadastrada com sucesso!");
+                // Limpa os campos
+                document.getElementById('nis').value = '';
+                document.getElementById('telefone').value = '';
+                document.getElementById('bairro').value = '';
+                document.getElementById('renda').value = '';
+                document.getElementById('endereco').value = '';
+                
+                carregarFamilias();
+            }
+        }
+
+        // 3. Função para carregar as famílias cadastradas
+        async function carregarFamilias() {
+            const ul = document.getElementById('ulFamilias');
+            ul.innerHTML = "<li>Buscando dados...</li>";
+
+            const { data, error } = await clienteSupabase
+                .from('familias')
+                .select('*')
+                .order('id_familia', { ascending: false });
+
+            if (error) {
+                ul.innerHTML = `<li>Erro ao carregar: ${error.message}</li>`;
+                return;
+            }
+
+            ul.innerHTML = "";
+
+            if (data.length === 0) {
+                ul.innerHTML = "<li>Nenhuma família cadastrada no sistema.</li>";
+                return;
+            }
+
+            data.forEach(fam => {
+                const li = document.createElement('li');
+                li.innerHTML = `
+                    <div>
+                        <strong>Bairro/Povoado:</strong> ${fam.bairro_povoado} <br>
+                        <strong>Endereço:</strong> ${fam.endereco_completo} <br>
+                        <strong>NIS:</strong> ${fam.nis_responsavel || 'Não informado'} | <strong>Contato:</strong> ${fam.telefone_contato || 'Não informado'}
+                    </div>
+                `;
+                ul.appendChild(li);
+            });
+        }
+
+        // 4. Função de Logout
+        async function fazerLogout() {
+            await clienteSupabase.auth.signOut();
+            window.location.href = 'login.html';
+        }
+    </script>
+
+</body>
+</html>
