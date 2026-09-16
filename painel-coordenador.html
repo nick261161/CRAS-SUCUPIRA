@@ -106,7 +106,7 @@
             <button class="tab-btn" onclick="mudarAba('relatorios', event)">📊 Relatórios do CRAS</button>
         </div>
 
-        <!-- 1. NOTÍCIAS -->
+        <!-- 1. NOTÍCIAS (COM MÚLTIPLAS FOTOS E CORREÇÃO DE SALVAMENTO) -->
         <div id="secao-noticias" class="panel-section active">
             <h3 id="tituloFormNoticia">📝 Publicar Nova Notícia no Portal</h3>
             <input type="hidden" id="editNoticiaId">
@@ -116,7 +116,7 @@
             </div>
             <div class="form-grid">
                 <div class="form-group">
-                    <label>URL da Imagem de Capa (Opcional):</label>
+                    <label>URL da Imagem de Capa (Principal):</label>
                     <input type="text" id="noticiaImagem" placeholder="https://exemplo.com/imagem.jpg">
                 </div>
                 <div class="form-group">
@@ -124,14 +124,21 @@
                     <input type="text" id="noticiaFonteImg" placeholder="Ex: ASCOM Prefeitura">
                 </div>
             </div>
-            <div class="form-group">
+            <div class="form-group full">
+                <label>Fotos Adicionais (Cole os links das fotos, separados por vírgula ou uma por linha):</label>
+                <textarea id="noticiaFotosExtras" placeholder="https://exemplo.com/foto1.jpg, https://exemplo.com/foto2.jpg" style="height: 60px;"></textarea>
+            </div>
+            <div class="form-group full">
                 <label>Conteúdo Completo:</label>
                 <textarea id="noticiaConteudo" placeholder="Escreva a matéria detalhada aqui..."></textarea>
             </div>
             <button class="btn-acao" onclick="salvarNoticia()" id="btnSalvarNoticia">Publicar Notícia</button>
-            <button class="btn-acao" onclick="limparFormNoticia()" style="background: var(--text-muted); margin-left: 10px;" id="btnCancelarEdicao" style="display:none;">Cancelar</button>
+            <button class="btn-acao" onclick="limparFormNoticia()" style="background: var(--text-muted); margin-left: 10px; display:none;" id="btnCancelarEdicao">Cancelar</button>
 
-            <h3 style="margin-top: 40px;">📋 Notícias Publicadas Atualmente</h3>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 40px; margin-bottom: 10px;">
+                <h3 style="margin: 0; border: none;">📋 Notícias Publicadas Atualmente</h3>
+                <button class="btn-acao" onclick="carregarNoticiasAdmin()" style="background-color: var(--success); padding: 8px 14px; font-size: 13px;">🔄 Atualizar Notícias</button>
+            </div>
             <ul id="listaNoticiasAdmin" class="lista-itens">
                 <li>Carregando postagens...</li>
             </ul>
@@ -325,7 +332,7 @@
             </ul>
         </div>
 
-        <!-- 6. RELATÓRIOS DO CRAS (COM TODOS OS FILTROS POSSÍVEIS) -->
+        <!-- 6. RELATÓRIOS DO CRAS -->
         <div id="secao-relatorios" class="panel-section">
             
             <div class="cabecalho-print">
@@ -336,7 +343,7 @@
             </div>
 
             <h3>📊 Relatórios do CRAS - Central de Filtros Avançados</h3>
-            <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 20px;">Selecione abaixo os critérios de filtro desejados para gerar relatórios detalhados das famílias e atendimentos:</p>
+            <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 20px;">Selecione abaixo os critérios de filtro desejados para gerar relatórios detalhados:</p>
             
             <div class="form-grid">
                 <div class="form-group">
@@ -365,11 +372,11 @@
                     <input type="text" id="filtroBairroPovoado" placeholder="Ex: Centro, Povoado São João...">
                 </div>
                 <div class="form-group">
-                    <label>5. Data Inicial (Atendimentos / Concessões):</label>
+                    <label>5. Data Inicial:</label>
                     <input type="date" id="filtroDataInicio">
                 </div>
                 <div class="form-group">
-                    <label>6. Data Final (Atendimentos / Concessões):</label>
+                    <label>6. Data Final:</label>
                     <input type="date" id="filtroDataFim">
                 </div>
             </div>
@@ -564,43 +571,64 @@
             evt.currentTarget.classList.add('active');
         }
 
-        // --- NOTÍCIAS ---
+        // --- NOTÍCIAS (CORRIGIDO COM TRATAMENTO DE ERROS E FOTOS EXTRAS) ---
         async function salvarNoticia() {
             const id = document.getElementById('editNoticiaId').value;
             const titulo = document.getElementById('noticiaTitulo').value;
             const url_imagem = document.getElementById('noticiaImagem').value;
             const fonte_imagem = document.getElementById('noticiaFonteImg').value;
+            const fotos_adicionais = document.getElementById('noticiaFotosExtras').value;
             const conteudo = document.getElementById('noticiaConteudo').value;
 
             if (!titulo || !conteudo) { mostrarAlerta("Atenção", "Preencha o título e o conteúdo."); return; }
 
+            const dadosNoticia = { titulo, url_imagem, fonte_imagem, fotos_adicionais, conteudo, id_autor: usuarioId };
+
             if (id) {
-                await clienteSupabase.from('noticias_blog').update({ titulo, url_imagem, fonte_imagem, conteudo }).eq('id_noticia', id);
+                let { error } = await clienteSupabase.from('noticias_blog').update(dadosNoticia).eq('id_noticia', id);
+                if (error) { mostrarAlerta("Erro ao atualizar", error.message); return; }
                 mostrarAlerta("Sucesso", "Notícia atualizada!");
             } else {
-                await clienteSupabase.from('noticias_blog').insert([{ titulo, url_imagem, fonte_imagem, conteudo, id_autor: usuarioId }]);
+                let { error } = await clienteSupabase.from('noticias_blog').insert([dadosNoticia]);
+                if (error) { mostrarAlerta("Erro ao publicar", error.message); return; }
                 mostrarAlerta("Sucesso", "Notícia publicada!");
             }
             limparFormNoticia();
-            carregarNoticiasAdmin();
+            await carregarNoticiasAdmin();
         }
 
         async function carregarNoticiasAdmin() {
             const ul = document.getElementById('listaNoticiasAdmin');
-            const { data } = await clienteSupabase.from('noticias_blog').select('*').order('data_publicacao', { ascending: false });
-            if (!data || data.length === 0) { if(ul) ul.innerHTML = "<li>Nenhuma notícia cadastrada.</li>"; return; }
-            if(ul) {
-                ul.innerHTML = "";
-                data.forEach(n => {
-                    ul.innerHTML += `
-                        <div><strong>${n.titulo}</strong><br><small style="color:var(--text-muted)">${new Date(n.data_publicacao).toLocaleDateString('pt-BR')}</small></div>
-                        <div>
-                            <button class="btn-editar" onclick='prepararEdicaoNoticia(${JSON.stringify(n)})'>Editar</button>
-                            <button class="btn-excluir" onclick="excluirNoticia(${n.id_noticia})">Excluir</button>
-                        </div>
-                    `;
-                });
+            if(!ul) return;
+            ul.innerHTML = "<li>Carregando postagens...</li>";
+
+            const { data, error } = await clienteSupabase.from('noticias_blog').select('*').order('data_publicacao', { ascending: false });
+            
+            if (error) {
+                ul.innerHTML = `<li>Erro ao carregar notícias: ${error.message}</li>`;
+                return;
             }
+
+            if (!data || data.length === 0) { 
+                ul.innerHTML = "<li>Nenhuma notícia cadastrada.</li>"; 
+                return; 
+            }
+
+            ul.innerHTML = "";
+            data.forEach(n => {
+                ul.innerHTML += `
+                    <li style="width:100%; display:flex; justify-content:space-between; align-items:center;">
+                        <div>
+                            <strong>${n.titulo}</strong><br>
+                            <small style="color:var(--text-muted)">Publicado em: ${new Date(n.data_publicacao).toLocaleDateString('pt-BR')}</small>
+                        </div>
+                        <div>
+                            <button class="btn-editar" onclick='prepararEdicaoNoticia(${JSON.stringify(n)})'>✏️ Editar</button>
+                            <button class="btn-excluir" onclick="excluirNoticia(${n.id_noticia})">🗑️ Excluir</button>
+                        </div>
+                    </li>
+                `;
+            });
         }
 
         function prepararEdicaoNoticia(n) {
@@ -608,6 +636,7 @@
             document.getElementById('noticiaTitulo').value = n.titulo;
             document.getElementById('noticiaImagem').value = n.url_imagem || '';
             document.getElementById('noticiaFonteImg').value = n.fonte_imagem || '';
+            document.getElementById('noticiaFotosExtras').value = n.fotos_adicionais || '';
             document.getElementById('noticiaConteudo').value = n.conteudo;
             document.getElementById('tituloFormNoticia').textContent = "✏️ Editar Notícia";
             document.getElementById('btnSalvarNoticia').textContent = "Salvar Alterações";
@@ -620,6 +649,7 @@
             document.getElementById('noticiaTitulo').value = '';
             document.getElementById('noticiaImagem').value = '';
             document.getElementById('noticiaFonteImg').value = '';
+            document.getElementById('noticiaFotosExtras').value = '';
             document.getElementById('noticiaConteudo').value = '';
             document.getElementById('tituloFormNoticia').textContent = "📝 Publicar Nova Notícia no Portal";
             document.getElementById('btnSalvarNoticia').textContent = "Publicar Notícia";
@@ -628,8 +658,9 @@
 
         async function excluirNoticia(id) {
             if (confirm("Excluir esta notícia?")) {
-                await clienteSupabase.from('noticias_blog').delete().eq('id_noticia', id);
-                carregarNoticiasAdmin();
+                let { error } = await clienteSupabase.from('noticias_blog').delete().eq('id_noticia', id);
+                if (error) { mostrarAlerta("Erro", error.message); return; }
+                await carregarNoticiasAdmin();
                 mostrarAlerta("Removido", "Notícia excluída.");
             }
         }
@@ -732,15 +763,17 @@
                 let rendaFmt = f.renda_familiar_total ? `R$ ${formatarMoedaExibicao(f.renda_familiar_total)}` : 'N/A';
                 let zonaFmt = f.zona || 'Não informada';
                 ul.innerHTML += `
-                    <div>
-                        <strong>Resp: ${f.nome_responsavel || 'Não informado'}</strong> | <span style="color:var(--primary);">${zonaFmt}</span> (${f.bairro || f.bairro_povoado || 'N/A'})<br>
-                        <small style="color:var(--text-muted)">CadÚnico: ${f.codigo_familiar_cadunico || 'N/A'} | Renda Total: ${rendaFmt} | Tel: ${f.telefone_contato || 'N/A'}</small>
-                    </div>
-                    <div>
-                        <button class="btn-cidadao" onclick="abrirModalCidadaos(${f.id_familia}, '${f.nome_responsavel || 'Família'}')">👥 Cidadãos</button>
-                        <button class="btn-editar" onclick='prepararEdicaoFamilia(${JSON.stringify(f)})'>Editar</button>
-                        <button class="btn-excluir" onclick="excluirFamilia(${f.id_familia})">Excluir</button>
-                    </div>
+                    <li style="width:100%; display:flex; justify-content:space-between; align-items:center;">
+                        <div>
+                            <strong>Resp: ${f.nome_responsavel || 'Não informado'}</strong> | <span style="color:var(--primary);">${zonaFmt}</span> (${f.bairro || f.bairro_povoado || 'N/A'})<br>
+                            <small style="color:var(--text-muted)">CadÚnico: ${f.codigo_familiar_cadunico || 'N/A'} | Renda Total: ${rendaFmt} | Tel: ${f.telefone_contato || 'N/A'}</small>
+                        </div>
+                        <div>
+                            <button class="btn-cidadao" onclick="abrirModalCidadaos(${f.id_familia}, '${f.nome_responsavel || 'Família'}')">👥 Cidadãos</button>
+                            <button class="btn-editar" onclick='prepararEdicaoFamilia(${JSON.stringify(f)})'>Editar</button>
+                            <button class="btn-excluir" onclick="excluirFamilia(${f.id_familia})">Excluir</button>
+                        </div>
+                    </li>
                 `;
             });
         }
@@ -1246,7 +1279,7 @@
             }
         }
 
-        // --- RELATÓRIOS DO CRAS (CENTRO DE FILTROS AVANÇADOS) ---
+        // --- RELATÓRIOS DO CRAS ---
         async function executarRelatorioAvancado() {
             const tipo = document.getElementById('tipoRelatorioFiltro').value;
             const zonaSel = document.getElementById('filtroZona').value;
