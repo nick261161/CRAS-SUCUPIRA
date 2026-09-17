@@ -31,7 +31,6 @@
         * { box-sizing: border-box; transition: background-color 0.3s, color 0.3s, transform 0.2s, box-shadow 0.3s; }
         body { font-family: 'Inter', sans-serif; background-color: var(--bg-color); color: var(--text-main); margin: 0; padding: 0; }
 
-        /* Header com fundo Branco para destacar a logo e o texto */
         header {
             background-color: #ffffff;
             border-bottom: 2px solid var(--border-color);
@@ -51,12 +50,10 @@
         .logo-area-pequena { display: flex; align-items: center; gap: 12px; cursor: pointer; }
         .logo-area-pequena img { height: 42px; width: auto; object-fit: contain; }
         
-        /* Ajuste de cores solicitado: Nome principal em preto, subtítulo em azul */
         .logo-text h1 { margin: 0; font-size: 18px; font-weight: 700; color: #000000; }
         body.dark-mode .logo-text h1 { color: #ffffff; }
         .logo-text span { font-size: 12px; color: var(--primary); font-weight: 600; display: block; }
 
-        /* Menu Hamburger */
         .menu-container { position: relative; }
         .btn-hamburger {
             background: var(--bg-color);
@@ -85,7 +82,6 @@
         .dropdown-menu a:hover, .dropdown-menu button:hover { background-color: rgba(2, 132, 199, 0.08); color: var(--primary); }
         .dropdown-divider { height: 1px; background-color: var(--border-color); margin: 0; }
 
-        /* Hero Banner */
         .hero {
             background: linear-gradient(135deg, #ccd6db, #0369a1), url('https://images.unsplash.com/photo-1532629345422-7515f3d16bb9?auto=format&fit=crop&w=1400&q=80');
             background-size: cover; background-position: center; background-blend-mode: overlay;
@@ -98,7 +94,6 @@
         .hero h2 { font-size: 28px; font-weight: 700; margin: 0 0 10px 0; }
         .hero p { font-size: 15px; max-width: 600px; margin: 0 auto; opacity: 0.95; font-weight: 300; }
 
-        /* Container Principal */
         .container { max-width: 1100px; margin: 0 auto; padding: 0 20px 50px 20px; }
 
         .barra-pesquisa { position: relative; margin-bottom: 35px; }
@@ -166,7 +161,6 @@
 <body>
 
     <header>
-        <!-- Logo Pequena no Canto Superior Esquerdo -->
         <div class="logo-area-pequena" onclick="carregarHome()">
             <img src="logomenor CRAS.png" alt="Logo Pequena" onerror="this.src='https://via.placeholder.com/40x40?text=MA'">
             <div class="logo-text">
@@ -190,7 +184,6 @@
     </header>
 
     <div class="hero">
-        <!-- Logo Maior Centralizada no Banner -->
         <img src="logosucupira.png" alt="Logo Oficial Central" class="logo-grande" onerror="this.style.display='none'">
         <h2>Assistência com Dignidade e Cuidado</h2>
         <p>Centro de Referência da Assistência Social - Garantindo direitos e proteção social para as famílias de Sucupira do Riachão.</p>
@@ -256,8 +249,8 @@
                         </div>
                         <div class="sidebar-card">
                             <h4>Informações Úteis</h4>
-                            <p style="font-size: 14px; color: var(--text-muted); line-height: 1.5;"><strong>Horário:</strong><br>Segunda a Sexta, das 08h às 14h.</p>
-                            <p style="font-size: 14px; color: var(--text-muted); line-height: 1.5; margin-bottom: 0;"><strong>Localização:</strong><br>Centro, Sucupira do Riachão - MA</p>
+                            <p style="font-size: 14px; color: var(--text-muted); line-height: 1.5;"><strong>Horário:</strong><br>Segunda a Sexta, das 08h às 17h.</p>
+                            <p style="font-size: 14px; color: var(--text-muted); line-height: 1.5; margin-bottom: 0;"><strong>Localização:</strong><br>Rua São José, 479, Centro, Sucupira do Riachão - MA</p>
                         </div>
                     </div>
                 </div>
@@ -336,23 +329,51 @@
 
             if (tipo === 'paif') {
                 titulo = "Serviço de Proteção e Atendimento Integral à Família (PAIF)";
-                texto = "O Serviço de Proteção e Atendimento Integral à Família (PAIF) constitui o eixo central da Proteção Social Básica do Sistema Único de Assistência Social (SUAS), sendo executado de forma continuada nos Centros de Referência da Assistência Social (CRAS). O principal objetivo desse serviço é prevenir a ocorrência de situações de vulnerabilidade e risco social nos territórios, fortalecendo os vínculos familiares e comunitários por meio do estímulo à autonomia e da promoção do acesso a direitos de cidadania.O público prioritário do PAIF abrange famílias em situação de vulnerabilidade social, o que inclui, de maneira destacada, os beneficiários de programas de transferência de renda, como o Bolsa Família e o Benefício de Prestação Continuada (BPC). A atuação prática do CRAS nesse processo ocorre como a principal "porta de entrada" das políticas públicas assistenciais, estruturando-se a partir de ações essenciais como o acolhimento humanizado, a escuta qualificada e o atendimento particularizado, que permitem compreender a realidade socioeconômica e as necessidades específicas de cada núcleo familiar.Além do atendimento individual, o serviço promove o Trabalho Social com Famílias por meio de encontros grupais periódicos. Esses espaços coletivos fomentam o debate sobre temas cotidianos — tais como cidadania, relações familiares, educação e orçamento doméstico —, estimulando o protagonismo social e a solidariedade entre os participantes. Paralelamente, os técnicos do CRAS realizam articulações intersetoriais fundamentais, encaminhando as famílias para a rede de proteção integrada, que engloba áreas como saúde, educação, habitação, além de apoiar na emissão de documentos civis e na concessão de benefícios eventuais em caráter temporário.Dessa forma, o PAIF ultrapassa a lógica do mero suporte assistencial pontual, configurando-se como uma estratégia estruturante de emancipação humana. Ao atuar diretamente na raiz das fragilidades cotidianas, o serviço capacita as famílias para que compreendam seu papel de direito e dever, transformando suas próprias realidades e construindo caminhos mais seguros e dignos para o futuro comunitário.";
+                texto = `O Serviço de Proteção e Atendimento Integral à Família (PAIF) constitui o eixo central da Proteção Social Básica do Sistema Único de Assistência Social (SUAS), sendo executado de forma continuada nos Centros de Referência da Assistência Social (CRAS).\n\n` +
+                        `O principal objetivo desse serviço é prevenir a ocorrência de situações de vulnerabilidade e risco social nos territórios, fortalecendo os vínculos familiares e comunitários por meio do estímulo à autonomia e da promoção do acesso a direitos de cidadania.\n\n` +
+                        `**Público Prioritário e Formas de Atuação:**\n` +
+                        `O público prioritário do PAIF abrange famílias em situação de vulnerabilidade social, o que inclui, de maneira destacada, os beneficiários de programas de transferência de renda, como o Bolsa Família e o Benefício de Prestação Continuada (BPC). A atuação prática do CRAS nesse processo ocorre como a principal "porta de entrada" das políticas públicas assistenciais, estruturando-se a partir de ações essenciais como o acolhimento humanizado, a escuta qualificada e o atendimento particularizado, que permitem compreender a realidade socioeconômica e as necessidades específicas de cada núcleo familiar.\n\n` +
+                        `**Trabalho Social Continuado:**\n` +
+                        `Além do atendimento individual, o serviço promove o Trabalho Social com Famílias por meio de encontros grupais periódicos. Esses espaços coletivos fomentam o debate sobre temas cotidianos — tais como cidadania, relações familiares, educação e orçamento doméstico —, estimulando o protagonismo social e a solidariedade entre os participantes. Paralelamente, os técnicos do CRAS realizam articulações intersetoriais fundamentais, encaminhando as famílias para a rede de proteção integrada, que engloba áreas como saúde, educação, habitação, além de apoiar na emissão de documentos civis e na concessão de benefícios eventuais em caráter temporário.\n\n` +
+                        `Dessa forma, o PAIF ultrapassa a lógica do mero suporte assistencial pontual, configurando-se como uma estratégia estruturante de emancipação humana. Ao atuar diretamente na raiz das fragilidades cotidianas, o serviço capacita as famílias para que compreendam seu papel de direito e dever, transformando suas próprias realidades e construindo caminhos mais seguros e dignos para o futuro comunitário.`;
+            
             } else if (tipo === 'cadunico') {
                 titulo = "CadÚnico e Bolsa Família";
-                texto = "Você precisa estar com os dados corretos no CadÚnico para ter chance de receber o Bolsa Família, e o lugar onde você faz e mantém esse cadastro atualizado é justamente o CRAS do seu município";
+                texto = `A integração entre o Cadastro Único (CadÚnico), o programa Bolsa Família e o Centro de Referência de Assistência Social (CRAS) constitui a espinha dorsal da política de proteção social no Brasil. Longe de atuarem de forma isolada, esses três pilares funcionam como uma engrenagem contínua, estruturada para identificar, atender e acompanhar a população em situação de vulnerabilidade socioeconômica.\n\n` +
+                        `**O Papel do Cadastro Único:**\n` +
+                        `O CadÚnico consolida-se como a principal ferramenta de mapeamento social do Governo Federal. Ao registrar informações detalhadas sobre a composição familiar, renda e condições de moradia dos cidadãos de baixa renda, o sistema opera como uma grande porta de entrada para os direitos básicos, viabilizando o acesso não apenas ao Bolsa Família, mas a diversos outros programas sociais federais, estaduais e municipais.\n\n` +
+                        `**O Programa Bolsa Família:**\n` +
+                        `O Bolsa Família atua no combate direto à pobreza extrema por meio da transferência direta de renda, promovendo a garantia do sustento fundamental e exigindo contrapartidas essenciais e educativas em áreas vitais como saúde (vacinação e acompanhamento nutricional) e educação (frequência escolar regular).\n\n` +
+                        `**A Atuação do CRAS na Gestão:**\n` +
+                        `Nesse cenário, o CRAS desempenha um papel territorial e estratégico indispensável. Como braço operacional da assistência social presente nos municípios, a instituição é o espaço físico onde o CadÚnico ganha vida. Cabe aos profissionais do CRAS realizar a triagem inicial, a entrevista social, a inscrição e a manutenção periódica (atualização cadastral bienal) dos dados das famílias. Além da gestão cadastral, a unidade atua na orientação contra bloqueios, averiguações cadastrais, revisões ou suspensões de benefícios, prestando suporte completo à comunidade.\n\n` +
+                        `Assim, a atuação conjunta desses elementos assegura a efetividade das políticas públicas no país. Enquanto o CadÚnico mapeia e o Bolsa Família provê o suporte financeiro imediato, é a presença humanizada do CRAS que garante que o amparo governamental alcance com justiça e dignidade quem mais necessita.`;
+            
             } else if (tipo === 'bpc') {
                 titulo = "Benefício de Prestação Continuada (BPC)";
-                texto = "O BPC assegura a transferência de um salário mínimo ao idoso com 65 anos ou mais e à pessoa com deficiência de qualquer idade que comprovem não possuir meios de prover a própria manutenção.";
+                texto = `O Benefício de Prestação Continuada (BPC), regulamentado pela Lei Orgânica da Assistência Social (LOAS), assegura a transferência mensal de **um salário mínimo** para:\n\n` +
+                        `1. **Idosos com 65 anos ou mais** que comprovem não possuir meios de prover a própria manutenção nem de tê-la provida por sua família.\n` +
+                        `2. **Pessoas com deficiência** de qualquer idade que apresentem impedimentos de longo prazo (de natureza física, mental, intelectual ou sensorial) os quais, em interação com diversas barreiras, obstruem sua participação plena e efetiva na sociedade em igualdade de condições.\n\n` +
+                        `**Diferença Importante:**\n` +
+                        `Vale destacar que o BPC **não é uma aposentadoria**, pois não exige contribuições prévias à Previdência Social (INSS), não gera direito a 13º salário e não deixa pensão por morte.\n\n` +
+                        `**O papel do CRAS:**\n` +
+                        `Para solicitar o BPC, é obrigatório que o cidadão e todos os membros da sua família estejam devidamente cadastrados e com os dados atualizados no **CadÚnico**. O CRAS atua prestando as orientações necessárias sobre os critérios de renda familiar per capita (inferior a 1/4 do salário mínimo), auxiliando no encaminhamento e na compreensão dos trâmites junto ao INSS.`;
+            
             } else if (tipo === 'direitos') {
                 titulo = "Orientações sobre Direitos Sociais";
-                texto = "O CRAS oferece orientações detalhadas sobre os direitos sociais garantidos pela Constituição Federal e pelas leis de assistência social, prestando suporte completo para o encaminhamento e emissão de documentos.";
+                texto = `O CRAS oferece orientações detalhadas e acompanhamento especializado sobre os direitos sociais garantidos pela Constituição Federal de 1988 e pela Lei Orgânica da Assistência Social (LOAS).\n\n` +
+                        `**Principais Frentes de Orientação:**\n` +
+                        `* **Acesso à Documentação Básica:** Suporte e encaminhamento para a emissão gratuita de certidões civis (nascimento, casamento), RG, CPF e Carteira de Trabalho.\n` +
+                        `* **Benefícios Eventuais:** Auxílios temporários fornecidos pelo município em virtude de nascimento, morte (auxílio-funeral), vulnerabilidade temporária ou calamidades públicas.\n` +
+                        `* **Encaminhamentos à Rede de Proteção:** Direcionamento qualificado para outras políticas públicas essenciais, como a Rede de Saúde (UBS), a Rede de Ensino, o Conselho Tutelar, o CREAS e órgãos de empregabilidade (SINE).\n` +
+                        `* **Defesa de Cidadania:** Esclarecimento de dúvidas sobre deveres, garantias constitucionais, programas habitacionais e suporte contra violações de direitos humanos ou intempéries sociais.\n\n` +
+                        `O objetivo principal é assegurar que nenhum cidadão fique desamparado, fortalecendo a consciência de seus direitos fundamentais para o pleno exercício da cidadania em Sucupira do Riachão.`;
             }
 
             container.innerHTML = `
                 <button class="btn-voltar" onclick="carregarHome()">&larr; Voltar para o Início</button>
                 <div class="pagina-conteudo">
                     <h1 style="color: var(--primary); font-size: 28px; margin-top: 0;">${titulo}</h1>
-                    <p style="line-height: 1.8; font-size: 16px; margin-top: 25px; color: var(--text-main);">${texto}</p>
+                    <div style="line-height: 1.8; font-size: 16px; margin-top: 25px; color: var(--text-main); white-space: pre-line;">${texto}</div>
                 </div>
             `;
             window.scrollTo({ top: 0, behavior: 'smooth' });
